@@ -1,4 +1,4 @@
-module BinTree (someFunc) where
+module BinaryTreeHs.BinTree (BinaryTree(..),binInsGen,binInsGenLeaf,top,left,right,binIns) where
 data BinaryTree a = Nada | Leaf a | Tree (BinaryTree a) (BinaryTree a) (BinaryTree a) deriving (Show)
 --generic hook fuction
 type Hook a = (a -> a)
@@ -50,6 +50,3 @@ right x = x
 --convinence wrapper for the most common use case of a binary tree 
 binIns :: (Ord a) => BinaryTree a -> BinaryTree a -> BinaryTree a 
 binIns = binInsGenLeaf (\x->x) (==) (less)
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
