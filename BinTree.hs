@@ -1,8 +1,9 @@
-module BinaryTreeHs.BinTree (BinaryTree(..),binInsGen,binInsGenLeaf,top,left,right,binIns) where
+module BinaryTreeHs.BinTree (BinaryTree(..),binInsGen,binInsGenLeaf,top,left,right,binIns,binSearch,binSearchTup) where
 data BinaryTree a = Nada | Leaf a | Tree (BinaryTree a) (BinaryTree a) (BinaryTree a) deriving (Show)
 --generic hook fuction
 type Hook a = (a -> a)
-type BoolCompare  a = (a -> a -> Bool)
+type BoolCompare a = (a -> a -> Bool)
+type BoolCheck a = a -> Bool
 
 --not the most efficient thing in the world because haskell has to create a NEW binary tree every time it runs
 --but this works for our purposes
@@ -27,7 +28,6 @@ binInsGen _ _ _ val Nada = (Leaf val)
 binInsGenLeaf :: Hook (BinaryTree a) -> BoolCompare a -> BoolCompare a -> BinaryTree a -> BinaryTree a -> BinaryTree a
 binInsGenLeaf a b c (Leaf val) d = binInsGen a b c val d
 
-
 --need this for type constraints in an argument to a higher order function, I need to figure out how to use type constraints with just <
 less :: (Ord a) => a -> a -> Bool
 less x y = x < y
@@ -46,6 +46,27 @@ left x = x
 right :: BinaryTree a -> BinaryTree a
 right (Tree _ _ r) = r
 right x = x
+
+--the less and equ checks determine if the value is less or equal to the value that we are searching for
+--note we don't need to know that value, just how to check it
+--search the tree in binary order using the given comparison function
+binSearch :: BoolCheck a -> BoolCheck a -> BinaryTree a -> Maybe a
+binSearch less equ (Tree l (Leaf x) r)
+	| less x = binSearch less equ l
+	| not (equ x) = binSearch less equ r
+	| otherwise = Just x --we have found the value that we were searching for
+binSearch _ _ (Leaf x) = Just x
+binSearch _ _ Nada = Nothing
+
+--snd that works with Maybe 
+mbySnd :: Maybe (a,b) -> Maybe b
+mbySnd Nothing = Nothing
+mbySnd (Just x) = Just (snd x)
+
+--usefull for taged data
+--searches a binary tree of ordered tuples where the first element of the tupal can be ordered
+binSearchTup :: (Ord a) => BinaryTree (a,b) -> a -> Maybe b
+binSearchTup tree x = mbySnd (binSearch ((>x) . fst) ((==x) . fst) tree)
 
 --convinence wrapper for the most common use case of a binary tree 
 binIns :: (Ord a) => BinaryTree a -> BinaryTree a -> BinaryTree a 
