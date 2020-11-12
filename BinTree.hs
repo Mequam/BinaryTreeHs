@@ -58,6 +58,8 @@ binSearch less equ (Tree l (Leaf x) r)
 binSearch _ _ (Leaf x) = Just x
 binSearch _ _ Nada = Nothing
 
+binFound less equ tree = Nothing /= (binSearch less equ tree)
+
 binContains :: (Ord a) => BinaryTree a -> a -> Bool
 binContains tree x = (binSearch (>x) (x==) tree) /= Nothing
 --snd that works with Maybe 
@@ -90,5 +92,5 @@ binIns :: (Ord a) => BinaryTree a -> BinaryTree a -> BinaryTree a
 binIns = binInsGenLeaf (\x->x) (==) (less)
 
 --for debugging purposes
-leafArr = [Leaf (x,show (x^2))|x<-[1..]]
-genTree x = foldr binIns (Leaf (x `div` 2,(show ((x `div` 2)^2)))) (take x leafArr)
+leafArr = [Leaf x |x<-[1..]]
+genTree x = foldr binIns (Leaf (x `div` 2)) (take x leafArr)
