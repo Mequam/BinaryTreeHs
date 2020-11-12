@@ -1,4 +1,4 @@
-module BinaryTreeHs.BinTree (BinaryTree(..),binInsGen,binInsGenLeaf,top,left,right,binIns,binSearch,binSearchTup) where
+module BinaryTreeHs.BinTree (BinaryTree(..),binInsGen,binInsGenLeaf,top,left,right,binIns,binSearch,binSearchTup,tree2arr,binContainsAllOf) where
 data BinaryTree a = Nada | Leaf a | Tree (BinaryTree a) (BinaryTree a) (BinaryTree a) deriving (Show)
 --generic hook fuction
 type Hook a = (a -> a)
@@ -58,10 +58,27 @@ binSearch less equ (Tree l (Leaf x) r)
 binSearch _ _ (Leaf x) = Just x
 binSearch _ _ Nada = Nothing
 
+binContains :: (Ord a) => BinaryTree a -> a -> Bool
+binContains tree x = (binSearch (>x) (x==) tree) /= Nothing
 --snd that works with Maybe 
 mbySnd :: Maybe (a,b) -> Maybe b
 mbySnd Nothing = Nothing
 mbySnd (Just x) = Just (snd x)
+
+--this is a very not usefull funtion, but for edge cases where this could be needed
+tree2arr :: BinaryTree a -> [a]
+tree2arr (Tree l (Leaf v) r) = tree2arr l ++ (v : tree2arr r)
+tree2arr (Leaf x) = [x]
+tree2arr Nada = []
+
+containsFalse :: [Bool] -> Bool
+containsFalse (x:xl)
+	| x == False = False
+	| otherwise = containsFalse xl
+containsFalse [] = True 
+--not the most efficient algorithm in the world, but it is beutifly written down i an elegant manner
+binContainsAllOf :: (Ord a) => BinaryTree a -> BinaryTree a -> Bool
+binContainsAllOf t1 t2 = containsFalse [(binContains t1 x) | x <-(tree2arr t2)]
 
 --usefull for taged data
 --searches a binary tree of ordered tuples where the first element of the tupal can be ordered
@@ -71,3 +88,7 @@ binSearchTup tree x = mbySnd (binSearch ((>x) . fst) ((==x) . fst) tree)
 --convinence wrapper for the most common use case of a binary tree 
 binIns :: (Ord a) => BinaryTree a -> BinaryTree a -> BinaryTree a 
 binIns = binInsGenLeaf (\x->x) (==) (less)
+
+--for debugging purposes
+leafArr = [Leaf (x,show (x^2))|x<-[1..]]
+genTree x = foldr binIns (Leaf (x `div` 2,(show ((x `div` 2)^2)))) (take x leafArr)
